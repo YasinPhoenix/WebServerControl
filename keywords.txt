@@ -1,0 +1,75 @@
+#######################################
+# Syntax Coloring Map For WebServerControl
+#######################################
+
+#######################################
+# Classes (KEYWORD1)
+#######################################
+
+WebServerControl	KEYWORD1
+ContentProvider	KEYWORD1
+FileContentProvider	KEYWORD1
+CallbackContentProvider	KEYWORD1
+MemoryContentProvider	KEYWORD1
+GeneratorContentProvider	KEYWORD1
+MultiPartContentProvider	KEYWORD1
+CompressedContentProvider	KEYWORD1
+BufferedFileProvider	KEYWORD1
+SPIFFSProvider	KEYWORD1
+LittleFSProvider	KEYWORD1
+SDProvider	KEYWORD1
+FilesystemProviderFactory	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+streamCallback	KEYWORD2
+streamFile	KEYWORD2
+streamProvider	KEYWORD2
+setDefaultBufferSize	KEYWORD2
+getDefaultBufferSize	KEYWORD2
+setTimeout	KEYWORD2
+getTimeout	KEYWORD2
+isInitialized	KEYWORD2
+errorToString	KEYWORD2
+getVersion	KEYWORD2
+getMemoryStats	KEYWORD2
+readChunk	KEYWORD2
+getTotalSize	KEYWORD2
+getMimeType	KEYWORD2
+reset	KEYWORD2
+isReady	KEYWORD2
+addPart	KEYWORD2
+create	KEYWORD2
+
+#######################################
+# Constants and Enums (LITERAL1)
+#######################################
+
+WSCError	LITERAL1
+SUCCESS	LITERAL1
+INVALID_PARAMETER	LITERAL1
+BUFFER_TOO_LARGE	LITERAL1
+BUFFER_TOO_SMALL	LITERAL1
+PROVIDER_ERROR	LITERAL1
+FILE_NOT_FOUND	LITERAL1
+MEMORY_ALLOCATION_FAILED	LITERAL1
+ASYNC_SERVER_ERROR	LITERAL1
+TIMEOUT	LITERAL1
+UNKNOWN_ERROR	LITERAL1
+
+FilesystemType	LITERAL1
+AUTO_DETECT	LITERAL1
+SPIFFS	LITERAL1
+LITTLEFS	LITERAL1
+SD_CARD	LITERAL1
+GENERIC_FS	LITERAL1
+
+ContentCallback	LITERAL1
+ProgressCallback	LITERAL1
+
+DEFAULT_BUFFER_SIZE	LITERAL1
+MAX_BUFFER_SIZE	LITERAL1
+MIN_BUFFER_SIZE	LITERAL1
+DEFAULT_TIMEOUT_MS	LITERAL1
