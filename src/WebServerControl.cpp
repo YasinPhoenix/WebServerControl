@@ -250,18 +250,21 @@ void WebServerControl::handleStreamingRequest(AsyncWebServerRequest* request,
     size_t totalSize = provider->getTotalSize();
     String mimeType = provider->getMimeType();
     
+    // Convert unique_ptr to shared_ptr for lambda capture
+    std::shared_ptr<ContentProvider> sharedProvider = std::move(provider);
+    
     // Set up the response with proper headers
     AsyncWebServerResponse* response = request->beginChunkedResponse(mimeType, 
-        [provider = std::move(provider), bufferSize, progressCallback, userData, totalSize]
-        (uint8_t* buffer, size_t maxLen, size_t index) mutable -> size_t {
+        [sharedProvider, bufferSize, progressCallback, userData, totalSize]
+        (uint8_t* buffer, size_t maxLen, size_t index) -> size_t {
         
-        if (!provider) {
+        if (!sharedProvider) {
             return 0;
         }
         
         // Calculate how much to read (don't exceed buffer size or maxLen)
         size_t chunkSize = min(bufferSize, maxLen);
-        size_t bytesRead = provider->readChunk(buffer, chunkSize, index);
+        size_t bytesRead = sharedProvider->readChunk(buffer, chunkSize, index);
         
         // Call progress callback if provided
         if (progressCallback) {

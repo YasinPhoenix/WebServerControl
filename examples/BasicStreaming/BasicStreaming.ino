@@ -9,7 +9,7 @@
  * videos, or any large files on ESP8266/ESP32.
  */
 
-#include <WiFi.h>
+#include <ESP8266WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <WebServerControl.h>
 #include <LittleFS.h>
@@ -118,7 +118,7 @@ void setupStreamingRoutes() {
 void setupWebInterface() {
     // Main page with links to streaming examples
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        String html = R"(
+        String html = R"====(
 <!DOCTYPE html>
 <html>
 <head>
@@ -189,7 +189,7 @@ void setupWebInterface() {
     </script>
 </body>
 </html>
-        )";
+        )====";
         
         request->send(200, "text/html", html);
     });

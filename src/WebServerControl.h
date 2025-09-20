@@ -160,7 +160,6 @@ private:
     // Internal methods
     void handleStreamingRequest(AsyncWebServerRequest* request, std::unique_ptr<ContentProvider> provider, 
                                size_t bufferSize = 0, ProgressCallback progressCallback = nullptr, void* userData = nullptr);
-    static String getMimeTypeFromExtension(const String& filename);
     static bool validateBufferSize(size_t bufferSize);
     void sendErrorResponse(AsyncWebServerRequest* request, int code, const String& message);
 
@@ -276,6 +275,13 @@ public:
      * @return Version string
      */
     static String getVersion() { return "1.0.0"; }
+    
+    /**
+     * @brief Get MIME type from file extension
+     * @param filename Filename or path to extract extension from
+     * @return MIME type string
+     */
+    static String getMimeTypeFromExtension(const String& filename);
     
     /**
      * @brief Get memory usage statistics
