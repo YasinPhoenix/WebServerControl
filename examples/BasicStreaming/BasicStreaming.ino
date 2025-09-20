@@ -11,6 +11,7 @@
 
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <WebServerControl.h>
 #include <LittleFS.h>
 
 // WiFi credentials
