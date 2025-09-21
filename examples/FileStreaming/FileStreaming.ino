@@ -302,133 +302,133 @@ String listDirectory(fs::FS& fs, const String& path) {
 }
 
 String generateMainPage() {
-    String html = R"(
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Advanced File Streaming Demo</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .filesystem { background: #f8f9fa; padding: 20px; margin: 10px 0; border-radius: 5px; }
-        .filesystem.unavailable { background: #f5f5f5; color: #666; }
-        .file-list { margin: 10px 0; }
-        .file-item { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 5px 10px; 
-            background: white; 
-            margin: 2px 0; 
-            border-radius: 3px;
-        }
-        .button { 
-            padding: 5px 10px; 
-            background: #007bff; 
-            color: white; 
-            text-decoration: none; 
-            border-radius: 3px; 
-            font-size: 12px;
-        }
-        .button:hover { background: #0056b3; }
-        .button.small { padding: 3px 8px; font-size: 11px; }
-        .status { padding: 10px; background: #e9ecef; border-radius: 5px; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Advanced File Streaming Demo</h1>
-        
-        <div class="status">
-            <h3>System Status</h3>
-            <p><strong>Available Filesystems:</strong> <span id="fs-count">Loading...</span></p>
-            <p><strong>Free Memory:</strong> <span id="memory">Loading...</span></p>
-        </div>
-        
-        <div id="filesystems">
-            Loading filesystems...
-        </div>
-        
-        <div style="margin-top: 30px; padding: 20px; background: #e7f3ff; border-radius: 5px;">
-            <h3>Usage Examples</h3>
-            <p><strong>Stream file:</strong> /stream/{filesystem}/{filepath}</p>
-            <p><strong>List directory:</strong> /list/{filesystem}?path=/path</p>
-            <p><strong>File info:</strong> /info/{filesystem}/{filepath}</p>
-        </div>
-    </div>
-    
-    <script>
-        async function loadFilesystems() {
-            try {
-                const response = await fetch('/api/filesystems');
-                const filesystems = await response.json();
-                
-                document.getElementById('fs-count').textContent = 
-                    filesystems.filter(fs => fs.available).length + ' of ' + filesystems.length;
-                
-                const container = document.getElementById('filesystems');
-                container.innerHTML = '';
-                
-                for (const fs of filesystems) {
-                    const div = document.createElement('div');
-                    div.className = 'filesystem' + (fs.available ? '' : ' unavailable');
-                    div.innerHTML = `
-                        <h3>${fs.name} ${fs.available ? '✓' : '✗'}</h3>
-                        ${fs.available ? `
-                            <button onclick="loadFiles('${fs.name}')" class="button">List Files</button>
-                            <div id="files-${fs.name}" class="file-list"></div>
-                        ` : '<p>Filesystem not available</p>'}
-                    `;
-                    container.appendChild(div);
+    String html = R"====(
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Advanced File Streaming Demo</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .container { max-width: 1200px; margin: 0 auto; }
+                .filesystem { background: #f8f9fa; padding: 20px; margin: 10px 0; border-radius: 5px; }
+                .filesystem.unavailable { background: #f5f5f5; color: #666; }
+                .file-list { margin: 10px 0; }
+                .file-item { 
+                    display: flex; 
+                    justify-content: space-between; 
+                    padding: 5px 10px; 
+                    background: white; 
+                    margin: 2px 0; 
+                    border-radius: 3px;
                 }
-            } catch (error) {
-                console.error('Failed to load filesystems:', error);
-            }
-        }
-        
-        async function loadFiles(fsName) {
-            try {
-                const response = await fetch(`/list/${fsName}?path=/`);
-                const data = await response.json();
+                .button { 
+                    padding: 5px 10px; 
+                    background: #007bff; 
+                    color: white; 
+                    text-decoration: none; 
+                    border-radius: 3px; 
+                    font-size: 12px;
+                }
+                .button:hover { background: #0056b3; }
+                .button.small { padding: 3px 8px; font-size: 11px; }
+                .status { padding: 10px; background: #e9ecef; border-radius: 5px; margin-bottom: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Advanced File Streaming Demo</h1>
                 
-                const container = document.getElementById(`files-${fsName}`);
+                <div class="status">
+                    <h3>System Status</h3>
+                    <p><strong>Available Filesystems:</strong> <span id="fs-count">Loading...</span></p>
+                    <p><strong>Free Memory:</strong> <span id="memory">Loading...</span></p>
+                </div>
                 
-                if (data.error) {
-                    container.innerHTML = `<p>Error: ${data.error}</p>`;
-                    return;
+                <div id="filesystems">
+                    Loading filesystems...
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #e7f3ff; border-radius: 5px;">
+                    <h3>Usage Examples</h3>
+                    <p><strong>Stream file:</strong> /stream/{filesystem}/{filepath}</p>
+                    <p><strong>List directory:</strong> /list/{filesystem}?path=/path</p>
+                    <p><strong>File info:</strong> /info/{filesystem}/{filepath}</p>
+                </div>
+            </div>
+            
+            <script>
+                async function loadFilesystems() {
+                    try {
+                        const response = await fetch('/api/filesystems');
+                        const filesystems = await response.json();
+                        
+                        document.getElementById('fs-count').textContent = 
+                            filesystems.filter(fs => fs.available).length + ' of ' + filesystems.length;
+                        
+                        const container = document.getElementById('filesystems');
+                        container.innerHTML = '';
+                        
+                        for (const fs of filesystems) {
+                            const div = document.createElement('div');
+                            div.className = 'filesystem' + (fs.available ? '' : ' unavailable');
+                            div.innerHTML = `
+                                <h3>${fs.name} ${fs.available ? '✓' : '✗'}</h3>
+                                ${fs.available ? `
+                                    <button onclick="loadFiles('${fs.name}')" class="button">List Files</button>
+                                    <div id="files-${fs.name}" class="file-list"></div>
+                                ` : '<p>Filesystem not available</p>'}
+                            `;
+                            container.appendChild(div);
+                        }
+                    } catch (error) {
+                        console.error('Failed to load filesystems:', error);
+                    }
                 }
                 
-                if (data.files.length === 0) {
-                    container.innerHTML = '<p>No files found</p>';
-                    return;
+                async function loadFiles(fsName) {
+                    try {
+                        const response = await fetch(`/list/${fsName}?path=/`);
+                        const data = await response.json();
+                        
+                        const container = document.getElementById(`files-${fsName}`);
+                        
+                        if (data.error) {
+                            container.innerHTML = `<p>Error: ${data.error}</p>`;
+                            return;
+                        }
+                        
+                        if (data.files.length === 0) {
+                            container.innerHTML = '<p>No files found</p>';
+                            return;
+                        }
+                        
+                        container.innerHTML = data.files.map(file => `
+                            <div class="file-item">
+                                <span>${file.name} (${file.size} bytes)</span>
+                                <div>
+                                    ${!file.isDirectory ? `
+                                        <a href="/stream/${fsName}${data.path}${file.name}" class="button small">Stream</a>
+                                        <a href="/info/${fsName}${data.path}${file.name}" class="button small">Info</a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('');
+                        
+                    } catch (error) {
+                        console.error('Failed to load files:', error);
+                    }
                 }
                 
-                container.innerHTML = data.files.map(file => `
-                    <div class="file-item">
-                        <span>${file.name} (${file.size} bytes)</span>
-                        <div>
-                            ${!file.isDirectory ? `
-                                <a href="/stream/${fsName}${data.path}${file.name}" class="button small">Stream</a>
-                                <a href="/info/${fsName}${data.path}${file.name}" class="button small">Info</a>
-                            ` : ''}
-                        </div>
-                    </div>
-                `).join('');
+                // Load on page load
+                loadFilesystems();
                 
-            } catch (error) {
-                console.error('Failed to load files:', error);
-            }
-        }
-        
-        // Load on page load
-        loadFilesystems();
-        
-        // Auto-refresh every 30 seconds
-        setInterval(loadFilesystems, 30000);
-    </script>
-</body>
-</html>
-    )";
-    
+                // Auto-refresh every 30 seconds
+                setInterval(loadFilesystems, 30000);
+            </script>
+        </body>
+        </html>
+    )====";
+
     return html;
 }
 

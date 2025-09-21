@@ -119,76 +119,76 @@ void setupWebInterface() {
     // Main page with links to streaming examples
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         String html = R"====(
-<!DOCTYPE html>
-<html>
-<head>
-    <title>WebServerControl Demo</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .example { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 5px; }
-        .button { 
-            display: inline-block; 
-            padding: 10px 20px; 
-            background: #007bff; 
-            color: white; 
-            text-decoration: none; 
-            border-radius: 4px; 
-            margin: 5px;
-        }
-        .button:hover { background: #0056b3; }
-        .stats { background: #e9ecef; padding: 15px; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>WebServerControl Library Demo</h1>
-        <p>This example demonstrates chunked streaming without memory overflow.</p>
-        
-        <div class="stats">
-            <h3>System Information</h3>
-            <p><strong>Free Heap:</strong> <span id="heap">Loading...</span></p>
-            <p><strong>Library Version:</strong> )" + WebServerControl::getVersion() + R"(</p>
-        </div>
-        
-        <div class="example">
-            <h3>File Streaming</h3>
-            <p>Stream files directly from filesystem without loading into memory.</p>
-            <a href="/image" class="button">Download Test Image</a>
-            <a href="/log" class="button">View Log File</a>
-        </div>
-        
-        <div class="example">
-            <h3>Generated Content</h3>
-            <p>Generate and stream content on-demand (50KB of test data).</p>
-            <a href="/data" class="button">Download Generated Data</a>
-        </div>
-        
-        <div class="example">
-            <h3>Memory Management</h3>
-            <p>All streaming operations use chunked transfer to prevent heap overflow.</p>
-            <button onclick="updateStats()" class="button">Refresh Memory Stats</button>
-        </div>
-    </div>
-    
-    <script>
-        function updateStats() {
-            fetch('/stats')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('heap').textContent = 
-                        data.freeHeap + ' bytes (max alloc: ' + data.maxAlloc + ' bytes)';
-                });
-        }
-        
-        // Update stats on page load
-        updateStats();
-        
-        // Auto-refresh every 10 seconds
-        setInterval(updateStats, 10000);
-    </script>
-</body>
-</html>
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>WebServerControl Demo</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; }
+                    .container { max-width: 800px; margin: 0 auto; }
+                    .example { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 5px; }
+                    .button { 
+                        display: inline-block; 
+                        padding: 10px 20px; 
+                        background: #007bff; 
+                        color: white; 
+                        text-decoration: none; 
+                        border-radius: 4px; 
+                        margin: 5px;
+                    }
+                    .button:hover { background: #0056b3; }
+                    .stats { background: #e9ecef; padding: 15px; border-radius: 5px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>WebServerControl Library Demo</h1>
+                    <p>This example demonstrates chunked streaming without memory overflow.</p>
+
+                    <div class="stats">
+                        <h3>System Information</h3>
+                        <p><strong>Free Heap:</strong> <span id="heap">Loading...</span></p>
+                        <p><strong>Library Version:</strong> )====" + WebServerControl::getVersion() + R"====(</p>
+                    </div>
+
+                    <div class="example">
+                        <h3>File Streaming</h3>
+                        <p>Stream files directly from filesystem without loading into memory.</p>
+                        <a href="/image" class="button">Download Test Image</a>
+                        <a href="/log" class="button">View Log File</a>
+                    </div>
+
+                    <div class="example">
+                        <h3>Generated Content</h3>
+                        <p>Generate and stream content on-demand (50KB of test data).</p>
+                        <a href="/data" class="button">Download Generated Data</a>
+                    </div>
+
+                    <div class="example">
+                        <h3>Memory Management</h3>
+                        <p>All streaming operations use chunked transfer to prevent heap overflow.</p>
+                        <button onclick="updateStats()" class="button">Refresh Memory Stats</button>
+                    </div>
+                </div>
+
+                <script>
+                    function updateStats() {
+                        fetch('/stats')
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('heap').textContent = 
+                                    data.freeHeap + ' bytes (max alloc: ' + data.maxAlloc + ' bytes)';
+                            });
+                    }
+
+                    // Update stats on page load
+                    updateStats();
+
+                    // Auto-refresh every 10 seconds
+                    setInterval(updateStats, 10000);
+                </script>
+            </body>
+            </html>
         )====";
         
         request->send(200, "text/html", html);
