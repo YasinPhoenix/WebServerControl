@@ -13,12 +13,17 @@
  * - Progress monitoring and error handling
  */
 
-#include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <WebServerControl.h>
 #include <ContentProviders.h>
 #include <FilesystemProviders.h>
 #include <LittleFS.h>
+
+#if defined(ESP8266)
+#include <ESP8266WiFi.h>
+#elif defined(ESP32)
+#include <WiFi.h>
+#endif
 
 // WiFi credentials
 const char* ssid = "your-wifi-ssid";
@@ -338,11 +343,14 @@ void setupLiveStreaming() {
         
         auto provider = std::make_unique<LiveDataProvider>(duration, 500); // 500ms interval
         
+        // Convert to shared_ptr for lambda capture
+        std::shared_ptr<LiveDataProvider> sharedProvider = std::move(provider);
+        
         // Set response headers for streaming
         AsyncWebServerResponse* response = request->beginChunkedResponse("text/plain",
-            [provider = std::move(provider)](uint8_t* buffer, size_t maxLen, size_t index) mutable -> size_t {
-                if (!provider) return 0;
-                return provider->readChunk(buffer, maxLen, index);
+            [sharedProvider](uint8_t* buffer, size_t maxLen, size_t index) -> size_t {
+                if (!sharedProvider) return 0;
+                return sharedProvider->readChunk(buffer, maxLen, index);
             });
         
         response->addHeader("Cache-Control", "no-cache");
@@ -392,11 +400,14 @@ void streamCustomProvider(AsyncWebServerRequest* request,
     Serial.printf("Streaming %s (%u bytes, %s)\n", 
                   filename.c_str(), totalSize, mimeType.c_str());
     
+    // Convert to shared_ptr for lambda capture
+    std::shared_ptr<ContentProvider> sharedProvider = std::move(provider);
+    
     AsyncWebServerResponse* response = request->beginChunkedResponse(mimeType,
-        [provider = std::move(provider), filename](uint8_t* buffer, size_t maxLen, size_t index) mutable -> size_t {
-            if (!provider) return 0;
+        [sharedProvider, filename](uint8_t* buffer, size_t maxLen, size_t index) -> size_t {
+            if (!sharedProvider) return 0;
             
-            size_t bytesRead = provider->readChunk(buffer, maxLen, index);
+            size_t bytesRead = sharedProvider->readChunk(buffer, maxLen, index);
             
             // Log progress periodically
             static size_t lastLogged = 0;
@@ -436,14 +447,14 @@ String generateMainInterface() {
         </head>
         <body>
             <h1>WebServerControl Custom Provider Examples</h1>
-            
+
             <div class="status">
                 <h3>System Status</h3>
                 <p><strong>Free Memory:</strong> <span id="memory">Loading...</span></p>
                 <p><strong>Uptime:</strong> <span id="uptime">Loading...</span></p>
                 <p><strong>Library Version:</strong> <span id="version">Loading...</span></p>
             </div>
-            
+
             <div class="section">
                 <h2>Sensor Data Streaming</h2>
                 <div class="example">
@@ -453,7 +464,7 @@ String generateMainInterface() {
                     <a href="#" onclick="downloadSensors()" class="button">Download Sensor Data</a>
                 </div>
             </div>
-            
+
             <div class="section">
                 <h2>Pattern Generation</h2>
                 <div class="example">
@@ -469,7 +480,7 @@ String generateMainInterface() {
                     <a href="#" onclick="downloadPattern()" class="button">Generate Pattern</a>
                 </div>
             </div>
-            
+
             <div class="section">
                 <h2>Multi-Part Content</h2>
                 <div class="example">
@@ -477,7 +488,7 @@ String generateMainInterface() {
                     <a href="/multipart" class="button">View Multi-Part Document</a>
                 </div>
             </div>
-            
+
             <div class="section">
                 <h2>Memory Buffer</h2>
                 <div class="example">
@@ -485,7 +496,7 @@ String generateMainInterface() {
                     <a href="/api/buffer" class="button">Download Buffer</a>
                 </div>
             </div>
-            
+
             <div class="section">
                 <h2>Live Data Stream</h2>
                 <div class="example">
@@ -496,51 +507,51 @@ String generateMainInterface() {
                     <div id="liveData" class="live-data" style="display: none;"></div>
                 </div>
             </div>
-            
+
             <script>
                 function downloadSensors() {
                     const samples = document.getElementById('sensorSamples').value;
                     window.open(`/api/sensors?samples=${samples}`);
                 }
-                
+
                 function downloadPattern() {
                     const type = document.getElementById('patternType').value;
                     const size = document.getElementById('patternSize').value;
                     window.open(`/api/pattern?pattern=${type}&size=${size}`);
                 }
-                
+
                 async function startLiveStream() {
                     const duration = document.getElementById('liveDuration').value;
                     const dataDiv = document.getElementById('liveData');
-                    
+
                     dataDiv.style.display = 'block';
                     dataDiv.innerHTML = 'Starting live stream...\n';
-                    
+
                     try {
                         const response = await fetch(`/live?duration=${duration}`);
                         const reader = response.body.getReader();
                         const decoder = new TextDecoder();
-                        
+
                         while (true) {
                             const { done, value } = await reader.read();
                             if (done) break;
-                            
+
                             const text = decoder.decode(value);
                             dataDiv.innerHTML += text;
                             dataDiv.scrollTop = dataDiv.scrollHeight;
                         }
-                        
+
                         dataDiv.innerHTML += '\nStream completed.\n';
                     } catch (error) {
                         dataDiv.innerHTML += `\nError: ${error.message}\n`;
                     }
                 }
-                
+
                 async function updateStatus() {
                     try {
                         const response = await fetch('/api/status');
                         const data = await response.json();
-                        
+
                         document.getElementById('memory').textContent = 
                             `${data.freeHeap} bytes (max: ${data.maxAlloc})`;
                         document.getElementById('uptime').textContent = 
@@ -550,7 +561,7 @@ String generateMainInterface() {
                         console.error('Failed to update status:', error);
                     }
                 }
-                
+
                 // Update status on load and every 10 seconds
                 updateStatus();
                 setInterval(updateStatus, 10000);

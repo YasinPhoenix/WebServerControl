@@ -9,10 +9,15 @@
  * videos, or any large files on ESP8266/ESP32.
  */
 
-#include <ESP8266WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <WebServerControl.h>
 #include <LittleFS.h>
+
+#if defined(ESP8266)
+#include <ESP8266WiFi.h>
+#elif defined(ESP32)
+#include <WiFi.h>
+#endif
 
 // WiFi credentials
 const char* ssid = "your-wifi-ssid";

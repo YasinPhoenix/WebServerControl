@@ -5,23 +5,22 @@
  * @date 2025-09-20
  * 
  * This example demonstrates advanced file streaming capabilities including:
- * - Multiple filesystem support (LittleFS, SPIFFS, SD)
+ * - Multiple filesystem support (LittleFS, SD)
  * - Automatic filesystem detection
  * - File upload handling
  * - Directory browsing
  * - File management operations
  */
 
-#include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <WebServerControl.h>
 #include <FilesystemProviders.h>
+#include <LittleFS.h>
 
 #if defined(ESP8266)
-    #include <LittleFS.h>
+    #include <ESP8266WiFi.h>
 #elif defined(ESP32)
-    #include <SPIFFS.h>
-    #include <LittleFS.h>
+    #include <WiFi.h>
     #include <SD.h>
 #endif
 
@@ -85,15 +84,7 @@ void initializeFilesystems() {
     }
     
 #elif defined(ESP32)
-    // ESP32: SPIFFS, LittleFS, SD
-    if (SPIFFS.begin()) {
-        filesystems.push_back({"SPIFFS", &SPIFFS, true});
-        Serial.println("✓ SPIFFS mounted");
-    } else {
-        filesystems.push_back({"SPIFFS", &SPIFFS, false});
-        Serial.println("✗ SPIFFS failed to mount");
-    }
-    
+    // ESP32: LittleFS, SD
     if (LittleFS.begin()) {
         filesystems.push_back({"LittleFS", &LittleFS, true});
         Serial.println("✓ LittleFS mounted");
@@ -165,14 +156,17 @@ void setupFileStreamingRoutes() {
             return;
         }
         
+        // Convert to shared_ptr for lambda capture
+        std::shared_ptr<ContentProvider> sharedProvider = std::move(provider);
+        
         // Stream the file
-        size_t totalSize = provider->getTotalSize();
-        String mimeType = provider->getMimeType();
+        size_t totalSize = sharedProvider->getTotalSize();
+        String mimeType = sharedProvider->getMimeType();
         
         AsyncWebServerResponse* response = request->beginChunkedResponse(mimeType,
-            [provider = std::move(provider)](uint8_t* buffer, size_t maxLen, size_t index) mutable -> size_t {
-                if (!provider) return 0;
-                return provider->readChunk(buffer, maxLen, index);
+            [sharedProvider](uint8_t* buffer, size_t maxLen, size_t index) -> size_t {
+                if (!sharedProvider) return 0;
+                return sharedProvider->readChunk(buffer, maxLen, index);
             });
         
         response->addHeader("Content-Length", String(totalSize));
@@ -276,7 +270,7 @@ void setupWebInterface() {
 String listDirectory(fs::FS& fs, const String& path) {
     String json = "{\"path\":\"" + path + "\",\"files\":[";
     
-    File root = fs.open(path);
+    File root = fs.open(path, "r");
     if (!root || !root.isDirectory()) {
         json += "],\"error\":\"Invalid directory\"}";
         return json;
@@ -337,17 +331,17 @@ String generateMainPage() {
         <body>
             <div class="container">
                 <h1>Advanced File Streaming Demo</h1>
-                
+
                 <div class="status">
                     <h3>System Status</h3>
                     <p><strong>Available Filesystems:</strong> <span id="fs-count">Loading...</span></p>
                     <p><strong>Free Memory:</strong> <span id="memory">Loading...</span></p>
                 </div>
-                
+
                 <div id="filesystems">
                     Loading filesystems...
                 </div>
-                
+
                 <div style="margin-top: 30px; padding: 20px; background: #e7f3ff; border-radius: 5px;">
                     <h3>Usage Examples</h3>
                     <p><strong>Stream file:</strong> /stream/{filesystem}/{filepath}</p>
@@ -355,19 +349,19 @@ String generateMainPage() {
                     <p><strong>File info:</strong> /info/{filesystem}/{filepath}</p>
                 </div>
             </div>
-            
+
             <script>
                 async function loadFilesystems() {
                     try {
                         const response = await fetch('/api/filesystems');
                         const filesystems = await response.json();
-                        
+
                         document.getElementById('fs-count').textContent = 
                             filesystems.filter(fs => fs.available).length + ' of ' + filesystems.length;
-                        
+
                         const container = document.getElementById('filesystems');
                         container.innerHTML = '';
-                        
+
                         for (const fs of filesystems) {
                             const div = document.createElement('div');
                             div.className = 'filesystem' + (fs.available ? '' : ' unavailable');
@@ -384,24 +378,24 @@ String generateMainPage() {
                         console.error('Failed to load filesystems:', error);
                     }
                 }
-                
+
                 async function loadFiles(fsName) {
                     try {
                         const response = await fetch(`/list/${fsName}?path=/`);
                         const data = await response.json();
-                        
+
                         const container = document.getElementById(`files-${fsName}`);
-                        
+
                         if (data.error) {
                             container.innerHTML = `<p>Error: ${data.error}</p>`;
                             return;
                         }
-                        
+
                         if (data.files.length === 0) {
                             container.innerHTML = '<p>No files found</p>';
                             return;
                         }
-                        
+
                         container.innerHTML = data.files.map(file => `
                             <div class="file-item">
                                 <span>${file.name} (${file.size} bytes)</span>
@@ -413,15 +407,15 @@ String generateMainPage() {
                                 </div>
                             </div>
                         `).join('');
-                        
+
                     } catch (error) {
                         console.error('Failed to load files:', error);
                     }
                 }
-                
+
                 // Load on page load
                 loadFilesystems();
-                
+
                 // Auto-refresh every 30 seconds
                 setInterval(loadFilesystems, 30000);
             </script>
