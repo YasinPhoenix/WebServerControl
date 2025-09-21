@@ -211,7 +211,7 @@ public:
      */
     WSCError streamFile(const String& uri, const String& filePath, 
                        WebRequestMethodComposite method = HTTP_GET,
-                       fs::FS& fs = LittleFS, size_t bufferSize = 0, 
+                       fs::FS* fs = nullptr, size_t bufferSize = 0, 
                        ProgressCallback progressCallback = nullptr, void* userData = nullptr);
     
     /**

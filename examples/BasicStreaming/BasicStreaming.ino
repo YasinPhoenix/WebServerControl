@@ -112,7 +112,7 @@ void setupStreamingRoutes() {
     }
     
     // Example 3: Stream a text file
-    result = streamControl.streamFile("/log", "/system.log", HTTP_GET, LittleFS);
+    result = streamControl.streamFile("/log", "/system.log", HTTP_GET, &LittleFS);
     if (result == WSCError::SUCCESS) {
         Serial.println("✓ Log file streaming route '/log' registered");
     } else {

@@ -179,7 +179,7 @@ WSCError WebServerControl::streamCallback(const String& uri, WebRequestMethodCom
 }
 
 WSCError WebServerControl::streamFile(const String& uri, const String& filePath, 
-                                     WebRequestMethodComposite method, fs::FS& fs, 
+                                     WebRequestMethodComposite method, fs::FS* fs, 
                                      size_t bufferSize, ProgressCallback progressCallback, void* userData) {
     
     if (!_initialized || !_server) {
@@ -190,7 +190,12 @@ WSCError WebServerControl::streamFile(const String& uri, const String& filePath,
         return WSCError::INVALID_PARAMETER;
     }
     
-    if (!fs.exists(filePath)) {
+    // Default to LittleFS if no filesystem specified
+    if (!fs) {
+        fs = &LittleFS;
+    }
+    
+    if (!fs->exists(filePath)) {
         return WSCError::FILE_NOT_FOUND;
     }
     
@@ -203,7 +208,7 @@ WSCError WebServerControl::streamFile(const String& uri, const String& filePath,
     _server->on(uri.c_str(), method, [this, filePath, &fs, actualBufferSize, progressCallback, userData]
                 (AsyncWebServerRequest* request) {
         
-        auto provider = std::make_unique<FileContentProvider>(fs, filePath);
+        auto provider = std::make_unique<FileContentProvider>(*fs, filePath);
         if (!provider || !provider->isReady()) {
             sendErrorResponse(request, 404, "File not found or cannot be opened");
             return;
