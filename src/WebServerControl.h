@@ -15,7 +15,7 @@
  * - Custom content generators
  * - Production error handling
  * 
- * @author Your Name
+ * @author YasinPhoenix <mohammadyasinbemani@gmail.com>
  * @license MIT
  */
 
