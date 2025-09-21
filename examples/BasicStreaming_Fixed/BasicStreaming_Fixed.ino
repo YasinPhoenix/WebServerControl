@@ -1,19 +1,19 @@
 /**
- * @file BasicStreaming.ino
- * @brief Basic example demonstrating file streaming with WebServerControl
- * @version 1.0.0
- * @date 2025-09-20
+ * @file BasicStreaming_Fixed.ino
+ * @brief Fixed version of BasicStreaming example for ESP32 with ESP_Async_WebServer compatibility
+ * @version 1.0.1
+ * @date 2025-09-22
  * 
  * This example shows how to use WebServerControl to stream files from
  * LittleFS without loading them into memory. Perfect for serving images,
  * videos, or any large files on ESP8266/ESP32.
  * 
- * COMPATIBILITY NOTE:
- * If you encounter compilation errors with ESP_Async_WebServer on newer
- * ESP32 Arduino cores, use the BasicStreaming_Fixed.ino version instead.
+ * COMPATIBILITY FIX:
+ * This version includes workarounds for ESP_Async_WebServer const-correctness
+ * issues that cause compilation errors on newer ESP32 Arduino cores.
  */
 
-// Workaround for ESP_Async_WebServer const-correctness issues
+// Add this pragma to suppress the const-correctness warning/error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-fpermissive"
 
@@ -42,8 +42,8 @@ void setup() {
     Serial.begin(115200);
     delay(1000);
     
-    Serial.println("WebServerControl Basic Streaming Example");
-    Serial.println("========================================");
+    Serial.println("WebServerControl Basic Streaming Example (Fixed Version)");
+    Serial.println("========================================================");
     
     // Initialize LittleFS
     if (!LittleFS.begin()) {
@@ -138,7 +138,7 @@ void setupWebInterface() {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>WebServerControl Demo</title>
+                <title>WebServerControl Demo (Fixed)</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 40px; }
                     .container { max-width: 800px; margin: 0 auto; }
@@ -154,11 +154,16 @@ void setupWebInterface() {
                     }
                     .button:hover { background: #0056b3; }
                     .stats { background: #e9ecef; padding: 15px; border-radius: 5px; }
+                    .fix-note { background: #d4edda; padding: 15px; border-radius: 5px; border-left: 4px solid #28a745; margin-bottom: 20px; }
                 </style>
             </head>
             <body>
                 <div class="container">
-                    <h1>WebServerControl Library Demo</h1>
+                    <h1>WebServerControl Library Demo (Fixed Version)</h1>
+                    <div class="fix-note">
+                        <strong>Compatibility Fix Applied:</strong> This version includes workarounds for 
+                        ESP_Async_WebServer const-correctness issues on newer ESP32 Arduino cores.
+                    </div>
                     <p>This example demonstrates chunked streaming without memory overflow.</p>
 
                     <div class="stats">
