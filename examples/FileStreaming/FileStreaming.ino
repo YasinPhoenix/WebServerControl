@@ -17,12 +17,8 @@
 #include <FilesystemProviders.h>
 #include <LittleFS.h>
 
-#if defined(ESP8266)
-    #include <ESP8266WiFi.h>
-#elif defined(ESP32)
-    #include <WiFi.h>
-    #include <SD.h>
-#endif
+#include <ESP8266WiFi.h>
+#include <SD.h>
 
 // WiFi credentials
 const char* ssid = "your-wifi-ssid";
@@ -73,18 +69,7 @@ void loop() {
 void initializeFilesystems() {
     Serial.println("Initializing filesystems...");
     
-#if defined(ESP8266)
     // ESP8266: LittleFS
-    if (LittleFS.begin()) {
-        filesystems.push_back({"LittleFS", &LittleFS, true});
-        Serial.println("✓ LittleFS mounted");
-    } else {
-        filesystems.push_back({"LittleFS", &LittleFS, false});
-        Serial.println("✗ LittleFS failed to mount");
-    }
-    
-#elif defined(ESP32)
-    // ESP32: LittleFS, SD
     if (LittleFS.begin()) {
         filesystems.push_back({"LittleFS", &LittleFS, true});
         Serial.println("✓ LittleFS mounted");
@@ -101,7 +86,6 @@ void initializeFilesystems() {
         filesystems.push_back({"SD", &SD, false});
         Serial.println("ℹ SD card not available");
     }
-#endif
 }
 
 void connectToWiFi() {

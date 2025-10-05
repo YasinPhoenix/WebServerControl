@@ -10,8 +10,8 @@
  * Features:
  * - Memory-safe chunked streaming
  * - Multiple content source providers
- * - ESP8266/ESP32 compatibility
- * - File system integration (SPIFFS, LittleFS, SD)
+ * - ESP8266 compatibility
+ * - File system integration (LittleFS, SD)
  * - Custom content generators
  * - Production error handling
  * 
@@ -25,16 +25,12 @@
 #include <Arduino.h>
 
 #if defined(ESP8266)
-    #include <ESPAsyncWebServer.h>
-    #include <FS.h>
-    #include <LittleFS.h>
-#elif defined(ESP32)
-    #include <ESPAsyncWebServer.h>
-    #include <FS.h>
-    #include <SPIFFS.h>
-    #include <SD.h>
-#else
-    #error "WebServerControl only supports ESP8266 and ESP32"
+#include <ESPAsyncWebServer.h>
+#include <FS.h>
+#include <LittleFS.h>
+#include <SD.h>
+#elif 
+    #error "Unsupported platform. Only ESP8266 is supported."
 #endif
 
 #include <functional>
@@ -203,7 +199,7 @@ public:
      * @param uri URI path to handle
      * @param filePath Path to the file in filesystem
      * @param method HTTP method
-     * @param fs Filesystem to use (SPIFFS, LittleFS, SD, etc.)
+     * @param fs Filesystem to use (LittleFS, SD, etc.)
      * @param bufferSize Buffer size for streaming (0 = use default)
      * @param progressCallback Optional progress monitoring callback
      * @param userData Optional user data for callbacks

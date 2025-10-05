@@ -10,15 +10,8 @@
 
 #include "WebServerControl.h"
 
-#if defined(ESP8266)
-    #include <LittleFS.h>
-    #include <SD.h>
-#elif defined(ESP32)
-    #include <SPIFFS.h>
-    #include <LittleFS.h>
-    #include <SD.h>
-    #include <SD_MMC.h>
-#endif
+#include <LittleFS.h>
+#include <SD.h>
 
 /**
  * @brief Enhanced file content provider with buffering and error handling
@@ -133,73 +126,6 @@ public:
             _bufferOffset = 0;
             _bufferDataSize = 0;
             _eof = false;
-        }
-    }
-    
-    bool isReady() const override { return _isReady; }
-};
-
-/**
- * @brief SPIFFS-specific content provider with optimizations
- */
-class SPIFFSProvider : public ContentProvider {
-private:
-    String _filePath;
-    String _mimeType;
-    File _file;
-    size_t _totalSize;
-    bool _isReady;
-
-public:
-    explicit SPIFFSProvider(const String& filePath)
-        : _filePath(filePath), _totalSize(0), _isReady(false) {
-        
-#if defined(ESP32)
-        if (!SPIFFS.exists(_filePath)) {
-            return;
-        }
-        
-        _file = SPIFFS.open(_filePath, "r");
-        if (!_file) {
-            return;
-        }
-        
-        _totalSize = _file.size();
-        _mimeType = WebServerControl::getMimeTypeFromExtension(_filePath);
-        _isReady = true;
-#endif
-    }
-    
-    ~SPIFFSProvider() {
-        if (_file) {
-            _file.close();
-        }
-    }
-    
-    size_t readChunk(uint8_t* buffer, size_t maxSize, size_t offset) override {
-#if defined(ESP32)
-        if (!_isReady || !_file || !buffer) {
-            return 0;
-        }
-        
-        if (_file.position() != offset) {
-            if (!_file.seek(offset)) {
-                return 0;
-            }
-        }
-        
-        return _file.read(buffer, maxSize);
-#else
-        return 0;
-#endif
-    }
-    
-    size_t getTotalSize() const override { return _totalSize; }
-    String getMimeType() const override { return _mimeType; }
-    
-    void reset() override {
-        if (_file) {
-            _file.seek(0);
         }
     }
     
@@ -373,7 +299,6 @@ class FilesystemProviderFactory {
 public:
     enum class FilesystemType {
         AUTO_DETECT,
-        SPIFFS,
         LITTLEFS,
         SD_CARD,
         GENERIC_FS
@@ -391,9 +316,6 @@ public:
                                                   fs::FS* customFS = nullptr) {
         
         switch (fsType) {
-            case FilesystemType::SPIFFS:
-                return std::make_unique<SPIFFSProvider>(filePath);
-                
             case FilesystemType::LITTLEFS:
                 return std::make_unique<LittleFSProvider>(filePath);
                 
@@ -409,11 +331,6 @@ public:
             case FilesystemType::AUTO_DETECT:
             default:
                 // Try different filesystems in order of preference
-#if defined(ESP32)
-                if (SPIFFS.exists(filePath)) {
-                    return std::make_unique<SPIFFSProvider>(filePath);
-                }
-#endif
                 if (LittleFS.exists(filePath)) {
                     return std::make_unique<LittleFSProvider>(filePath);
                 }

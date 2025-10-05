@@ -6,11 +6,7 @@
  * 
  * This example shows how to use WebServerControl to stream files from
  * LittleFS without loading them into memory. Perfect for serving images,
- * videos, or any large files on ESP8266/ESP32.
- * 
- * COMPATIBILITY NOTE:
- * If you encounter compilation errors with ESP_Async_WebServer on newer
- * ESP32 Arduino cores, use the BasicStreaming_Fixed.ino version instead.
+ * videos, or any large files on ESP8266.
  */
 
 // Workaround for ESP_Async_WebServer const-correctness issues
@@ -24,11 +20,7 @@
 #include <WebServerControl.h>
 #include <LittleFS.h>
 
-#if defined(ESP8266)
 #include <ESP8266WiFi.h>
-#elif defined(ESP32)
-#include <WiFi.h>
-#endif
 
 // WiFi credentials
 const char* ssid = "your-wifi-ssid";

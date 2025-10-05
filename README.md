@@ -2,18 +2,17 @@
 
 [![Arduino Library](https://img.shields.io/badge/Arduino-Library-blue.svg)](https://www.arduino.cc/reference/en/libraries/)
 [![ESP8266](https://img.shields.io/badge/ESP8266-Compatible-green.svg)](https://arduino-esp8266.readthedocs.io/)
-[![ESP32](https://img.shields.io/badge/ESP32-Compatible-green.svg)](https://docs.espressif.com/projects/arduino-esp32/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A library that enhances **ESPAsyncWebServer** with efficient chunked streaming capabilities for serving large content without heap overflow. Perfect for ESP8266 and ESP32 projects that need to serve files, images, or generated content larger than available RAM.
+A library that enhances **ESPAsyncWebServer** with efficient chunked streaming capabilities for serving large content without heap overflow. Perfect for ESP8266 projects that need to serve files, images, or generated content larger than available RAM.
 
 ## 🚀 Features
 
 - **Memory-Safe Streaming**: Serve content larger than available heap without crashes
 - **Multiple Content Sources**: Files, generated content, memory buffers, and custom providers
-- **Filesystem Support**: SPIFFS, LittleFS, SD card with automatic detection
+- **Filesystem Support**: LittleFS, SD card with automatic detection
 - **Production Ready**: Comprehensive error handling, timeout management, and recovery mechanisms
-- **ESP8266/ESP32 Compatible**: Optimized for both platforms
+- **ESP8266 Compatible**: Optimized for ESP8266 platform
 - **Easy Integration**: Simple API that enhances existing ESPAsyncWebServer code
 - **Buffer Management**: Configurable buffer sizes with automatic validation
 - **Progress Monitoring**: Optional callbacks for tracking streaming progress
@@ -33,7 +32,7 @@ A library that enhances **ESPAsyncWebServer** with efficient chunked streaming c
 
 ### Dependencies
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
-- Platform-specific filesystem libraries (included with ESP8266/ESP32 cores)
+- Platform-specific filesystem libraries (included with ESP8266 core)
 
 ## 🔧 Quick Start
 
@@ -136,7 +135,7 @@ WSCError streamProvider(const String& uri,
 #### File Providers
 - `FileContentProvider`: Basic file streaming
 - `BufferedFileProvider`: Enhanced with internal buffering
-- `SPIFFSProvider`: SPIFFS-optimized provider
+
 - `LittleFSProvider`: LittleFS-optimized provider
 - `SDProvider`: SD card with error recovery
 
@@ -240,7 +239,7 @@ if (result != WSCError::SUCCESS) {
 // For ESP8266 with limited RAM
 streamControl.setDefaultBufferSize(2048);
 
-// For ESP32 with more RAM
+// For better performance if RAM allows
 streamControl.setDefaultBufferSize(8192);
 ```
 
@@ -269,9 +268,8 @@ Serial.printf("Free heap: %u, Max alloc: %u\n", freeHeap, maxAlloc);
 ## 📋 Requirements
 
 - **ESP8266** Arduino Core 2.7.0 or later
-- **ESP32** Arduino Core 1.0.4 or later
 - **ESPAsyncWebServer** library
-- **LittleFS** (ESP8266) or **SPIFFS** (ESP32) for file operations
+- **LittleFS** filesystem support
 
 ## 🤝 Contributing
 
@@ -290,8 +288,8 @@ This library is released under the MIT License. See LICENSE file for details.
 ## 🔗 Related Projects
 
 - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer) - The underlying web server library
-- [Arduino ESP8266/ESP32 Cores](https://github.com/esp8266/Arduino) - Platform support
+- [Arduino ESP8266 Core](https://github.com/esp8266/Arduino) - Platform support
 
 ---
 
-**WebServerControl** - Making large content streaming simple and memory-safe for ESP8266/ESP32 projects.
+**WebServerControl** - Making large content streaming simple and memory-safe for ESP8266 projects.

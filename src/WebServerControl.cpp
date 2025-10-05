@@ -358,14 +358,6 @@ String WebServerControl::errorToString(WSCError error) {
 }
 
 void WebServerControl::getMemoryStats(uint32_t& freeHeap, uint32_t& maxAllocHeap) {
-#if defined(ESP8266)
     freeHeap = ESP.getFreeHeap();
     maxAllocHeap = ESP.getMaxFreeBlockSize();
-#elif defined(ESP32)
-    freeHeap = ESP.getFreeHeap();
-    maxAllocHeap = ESP.getMaxAllocHeap();
-#else
-    freeHeap = 0;
-    maxAllocHeap = 0;
-#endif
 }
