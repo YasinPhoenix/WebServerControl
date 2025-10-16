@@ -11,7 +11,6 @@
 #include "WebServerControl.h"
 
 #include <LittleFS.h>
-#include <SD.h>
 
 /**
  * @brief Enhanced file content provider with buffering and error handling
@@ -19,8 +18,8 @@
 class BufferedFileProvider : public ContentProvider {
 private:
     fs::FS* _fs;
-    String _filePath;
-    String _mimeType;
+    const char* _filePath;
+    const char* _mimeType;
     File _file;
     size_t _totalSize;
     size_t _bufferSize;
@@ -61,7 +60,7 @@ public:
      * @param filePath Path to file
      * @param bufferSize Size of internal buffer (default 4KB)
      */
-    BufferedFileProvider(fs::FS& filesystem, const String& filePath, 
+    BufferedFileProvider(fs::FS& filesystem, const char* filePath, 
                         size_t bufferSize = 4096)
         : _fs(&filesystem), _filePath(filePath), _totalSize(0), 
           _bufferSize(bufferSize), _buffer(nullptr), _bufferOffset(0),
@@ -118,7 +117,7 @@ public:
     }
     
     size_t getTotalSize() const override { return _totalSize; }
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     
     void reset() override {
         if (_file) {
@@ -137,14 +136,14 @@ public:
  */
 class LittleFSProvider : public ContentProvider {
 private:
-    String _filePath;
-    String _mimeType;
+    const char* _filePath;
+    const char* _mimeType;
     File _file;
     size_t _totalSize;
     bool _isReady;
 
 public:
-    explicit LittleFSProvider(const String& filePath)
+    explicit LittleFSProvider(const char* filePath)
         : _filePath(filePath), _totalSize(0), _isReady(false) {
         
         if (!LittleFS.exists(_filePath)) {
@@ -182,111 +181,12 @@ public:
     }
     
     size_t getTotalSize() const override { return _totalSize; }
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     
     void reset() override {
         if (_file) {
             _file.seek(0);
         }
-    }
-    
-    bool isReady() const override { return _isReady; }
-};
-
-/**
- * @brief SD card content provider with error recovery
- */
-class SDProvider : public ContentProvider {
-private:
-    String _filePath;
-    String _mimeType;
-    File _file;
-    size_t _totalSize;
-    bool _isReady;
-    uint8_t _retryCount;
-    static const uint8_t MAX_RETRIES = 3;
-    
-    bool reopenFile() {
-        if (_file) {
-            _file.close();
-        }
-        
-        _file = SD.open(_filePath, FILE_READ);
-        return _file;
-    }
-
-public:
-    explicit SDProvider(const String& filePath)
-        : _filePath(filePath), _totalSize(0), _isReady(false), _retryCount(0) {
-        
-        if (!SD.exists(_filePath)) {
-            return;
-        }
-        
-        _file = SD.open(_filePath, FILE_READ);
-        if (!_file) {
-            return;
-        }
-        
-        _totalSize = _file.size();
-        _mimeType = WebServerControl::getMimeTypeFromExtension(_filePath);
-        _isReady = true;
-    }
-    
-    ~SDProvider() {
-        if (_file) {
-            _file.close();
-        }
-    }
-    
-    size_t readChunk(uint8_t* buffer, size_t maxSize, size_t offset) override {
-        if (!_isReady || !buffer) {
-            return 0;
-        }
-        
-        // Check if file is still valid
-        if (!_file && _retryCount < MAX_RETRIES) {
-            if (reopenFile()) {
-                _retryCount++;
-            } else {
-                return 0;
-            }
-        }
-        
-        if (!_file) {
-            return 0;
-        }
-        
-        if (_file.position() != offset) {
-            if (!_file.seek(offset)) {
-                // Try to reopen file on seek failure
-                if (_retryCount < MAX_RETRIES && reopenFile()) {
-                    _retryCount++;
-                    if (!_file.seek(offset)) {
-                        return 0;
-                    }
-                } else {
-                    return 0;
-                }
-            }
-        }
-        
-        size_t bytesRead = _file.read(buffer, maxSize);
-        if (bytesRead > 0) {
-            _retryCount = 0; // Reset retry count on successful read
-        }
-        
-        return bytesRead;
-    }
-    
-    size_t getTotalSize() const override { return _totalSize; }
-    String getMimeType() const override { return _mimeType; }
-    
-    void reset() override {
-        if (_file) {
-            _file.seek(0);
-        }
-        _retryCount = 0;
     }
     
     bool isReady() const override { return _isReady; }
@@ -300,7 +200,6 @@ public:
     enum class FilesystemType {
         AUTO_DETECT,
         LITTLEFS,
-        SD_CARD,
         GENERIC_FS
     };
     
@@ -319,9 +218,6 @@ public:
             case FilesystemType::LITTLEFS:
                 return std::make_unique<LittleFSProvider>(filePath);
                 
-            case FilesystemType::SD_CARD:
-                return std::make_unique<SDProvider>(filePath);
-                
             case FilesystemType::GENERIC_FS:
                 if (customFS) {
                     return std::make_unique<BufferedFileProvider>(*customFS, filePath);
@@ -333,9 +229,6 @@ public:
                 // Try different filesystems in order of preference
                 if (LittleFS.exists(filePath)) {
                     return std::make_unique<LittleFSProvider>(filePath);
-                }
-                if (SD.exists(filePath)) {
-                    return std::make_unique<SDProvider>(filePath);
                 }
                 break;
         }
