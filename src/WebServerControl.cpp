@@ -220,7 +220,7 @@ WSCError WebServerControl::streamFile(const String& uri, const String& filePath,
     return WSCError::SUCCESS;
 }
 
-WSCError WebServerControl::streamProvider(const String& uri, WebRequestMethodComposite method,
+WSCError WebServerControl::streamProvider(const char* uri, WebRequestMethodComposite method,
                                          std::unique_ptr<ContentProvider> provider, size_t bufferSize,
                                          ProgressCallback progressCallback, void* userData) {
     
@@ -228,7 +228,7 @@ WSCError WebServerControl::streamProvider(const String& uri, WebRequestMethodCom
         return WSCError::ASYNC_SERVER_ERROR;
     }
     
-    if (uri.isEmpty() || !provider || !provider->isReady()) {
+    if ((uri == nullptr || uri[0] == '\0') || !provider || !provider->isReady()) {
         return WSCError::INVALID_PARAMETER;
     }
     
