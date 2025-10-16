@@ -210,7 +210,7 @@ public:
      * @param customFS Custom filesystem pointer (for GENERIC_FS type)
      * @return Unique pointer to content provider, or nullptr on failure
      */
-    static std::unique_ptr<ContentProvider> create(const String& filePath, 
+    static std::unique_ptr<ContentProvider> create(const char* filePath, 
                                                   FilesystemType fsType = FilesystemType::AUTO_DETECT,
                                                   fs::FS* customFS = nullptr) {
         
