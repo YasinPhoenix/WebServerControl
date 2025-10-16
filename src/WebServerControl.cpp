@@ -17,14 +17,14 @@
 class FileContentProvider : public ContentProvider {
 private:
     fs::FS* _fs;
-    String _filePath;
-    String _mimeType;
+    const char* _filePath;
+    const char* _mimeType;
     File _file;
     size_t _totalSize;
     bool _isReady;
 
 public:
-    FileContentProvider(fs::FS& filesystem, const String& filePath) 
+    FileContentProvider(fs::FS& filesystem, const char* filePath) 
         : _fs(&filesystem), _filePath(filePath), _totalSize(0), _isReady(false) {
         
         if (_fs->exists(_filePath)) {
@@ -62,7 +62,7 @@ public:
         return _totalSize;
     }
     
-    String getMimeType() const override {
+    const char* getMimeType() const override {
         return _mimeType;
     }
     
@@ -84,13 +84,13 @@ class CallbackContentProvider : public ContentProvider {
 private:
     ContentCallback _callback;
     size_t _totalSize;
-    String _mimeType;
+    const char* _mimeType;
     void* _userData;
     bool _isReady;
 
 public:
     CallbackContentProvider(ContentCallback callback, size_t totalSize, 
-                           const String& mimeType, void* userData = nullptr)
+                           const char* mimeType, void* userData = nullptr)
         : _callback(callback), _totalSize(totalSize), _mimeType(mimeType), 
           _userData(userData), _isReady(callback != nullptr) {}
     
@@ -106,7 +106,7 @@ public:
         return _totalSize;
     }
     
-    String getMimeType() const override {
+    const char* getMimeType() const override {
         return _mimeType;
     }
     
@@ -141,16 +141,16 @@ WebServerControl::~WebServerControl() {
     // Cleanup if needed
 }
 
-WSCError WebServerControl::streamCallback(const String& uri, WebRequestMethodComposite method, 
+WSCError WebServerControl::streamCallback(const char* uri, WebRequestMethodComposite method, 
                                          ContentCallback callback, size_t totalSize, 
-                                         const String& mimeType, size_t bufferSize, 
+                                         const char* mimeType, size_t bufferSize, 
                                          ProgressCallback progressCallback, void* userData) {
     
     if (!_initialized || !_server) {
         return WSCError::ASYNC_SERVER_ERROR;
     }
     
-    if (!callback || uri.isEmpty()) {
+    if (!callback || (uri == nullptr || uri[0] == '\0')) {
         return WSCError::INVALID_PARAMETER;
     }
     
@@ -166,7 +166,7 @@ WSCError WebServerControl::streamCallback(const String& uri, WebRequestMethodCom
     }
     
     // Register the handler with AsyncWebServer
-    _server->on(uri.c_str(), method, [this, actualBufferSize, progressCallback, userData]
+    _server->on(uri, method, [this, actualBufferSize, progressCallback, userData]
                 (AsyncWebServerRequest* request) mutable {
         
         // Recreate provider for each request (callbacks are stateless)
@@ -178,7 +178,7 @@ WSCError WebServerControl::streamCallback(const String& uri, WebRequestMethodCom
     return WSCError::SUCCESS;
 }
 
-WSCError WebServerControl::streamFile(const String& uri, const String& filePath, 
+WSCError WebServerControl::streamFile(const char* uri, const char* filePath, 
                                      WebRequestMethodComposite method, fs::FS* fs, 
                                      size_t bufferSize, ProgressCallback progressCallback, void* userData) {
     
@@ -186,7 +186,7 @@ WSCError WebServerControl::streamFile(const String& uri, const String& filePath,
         return WSCError::ASYNC_SERVER_ERROR;
     }
     
-    if (uri.isEmpty() || filePath.isEmpty()) {
+    if ((uri == nullptr || uri[0] == '\0') || (filePath == nullptr || filePath[0] == '\0')) {
         return WSCError::INVALID_PARAMETER;
     }
     
@@ -205,7 +205,7 @@ WSCError WebServerControl::streamFile(const String& uri, const String& filePath,
     }
     
     // Register the handler with AsyncWebServer
-    _server->on(uri.c_str(), method, [this, filePath, &fs, actualBufferSize, progressCallback, userData]
+    _server->on(uri, method, [this, filePath, &fs, actualBufferSize, progressCallback, userData]
                 (AsyncWebServerRequest* request) {
         
         auto provider = std::make_unique<FileContentProvider>(*fs, filePath);
@@ -300,10 +300,13 @@ bool WebServerControl::validateBufferSize(size_t bufferSize) {
             bufferSize <= WebServerControlConfig::MAX_BUFFER_SIZE);
 }
 
-String WebServerControl::getMimeTypeFromExtension(const String& filename) {
-    String ext = filename.substring(filename.lastIndexOf('.') + 1);
-    ext.toLowerCase();
-    
+const char* WebServerControl::getMimeTypeFromExtension(const char* filename) {
+    if (filename == nullptr) return "application/octet-stream";
+
+    const char* ext = strrchr(filename, '.');
+    if (ext == nullptr) return "application/octet-stream";
+    ext++; // Move past the dot
+
     // Common MIME types
     if (ext == "html" || ext == "htm") return "text/html";
     if (ext == "css") return "text/css";
@@ -326,13 +329,13 @@ String WebServerControl::getMimeTypeFromExtension(const String& filename) {
     return "application/octet-stream"; // Default binary type
 }
 
-void WebServerControl::sendErrorResponse(AsyncWebServerRequest* request, int code, const String& message) {
+void WebServerControl::sendErrorResponse(AsyncWebServerRequest* request, int code, const char* message) {
     if (request) {
         request->send(code, "text/plain", message);
     }
 }
 
-String WebServerControl::errorToString(WSCError error) {
+const char* WebServerControl::errorToString(WSCError error) {
     switch (error) {
         case WSCError::SUCCESS:
             return "Success";
