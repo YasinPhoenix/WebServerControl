@@ -85,7 +85,7 @@ void setupStreamingRoutes() {
     if (result == WSCError::SUCCESS) {
         Serial.println("✓ File streaming route '/image' registered");
     } else {
-        Serial.println("⚠ File streaming route failed: " + WebServerControl::errorToString(result));
+        Serial.printf("⚠ File streaming route failed: %s\n", WebServerControl::errorToString(result));
         Serial.println("  Make sure to upload 'test_image.jpg' to LittleFS");
     }
     
@@ -101,7 +101,7 @@ void setupStreamingRoutes() {
     if (result == WSCError::SUCCESS) {
         Serial.println("✓ Generated content route '/data' registered");
     } else {
-        Serial.println("✗ Generated content route failed: " + WebServerControl::errorToString(result));
+        Serial.printf("✗ Generated content route failed: %s\n", WebServerControl::errorToString(result));
     }
     
     // Example 3: Stream a text file
