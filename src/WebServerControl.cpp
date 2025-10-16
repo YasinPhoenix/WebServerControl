@@ -253,7 +253,7 @@ void WebServerControl::handleStreamingRequest(AsyncWebServerRequest* request,
     }
     
     size_t totalSize = provider->getTotalSize();
-    String mimeType = provider->getMimeType();
+    const char* mimeType = provider->getMimeType();
     
     // Convert unique_ptr to shared_ptr for lambda capture
     std::shared_ptr<ContentProvider> sharedProvider = std::move(provider);
@@ -280,7 +280,7 @@ void WebServerControl::handleStreamingRequest(AsyncWebServerRequest* request,
     });
     
     // Set Content-Length header for better browser compatibility
-    response->addHeader("Content-Length", String(totalSize));
+    response->addHeader("Content-Length", (const char*)totalSize);
     
     // Send the response
     request->send(response);

@@ -198,7 +198,7 @@ public:
      * @param compressionType Type of compression ("gzip", "deflate", etc.)
      */
     CompressedContentProvider(std::unique_ptr<ContentProvider> sourceProvider, 
-                            const String& compressionType = "gzip")
+                            const char* compressionType = "gzip")
         : _sourceProvider(std::move(sourceProvider)), _isReady(false) {
         
         if (_sourceProvider && _sourceProvider->isReady()) {
