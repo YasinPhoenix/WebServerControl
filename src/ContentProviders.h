@@ -18,7 +18,7 @@ class MemoryContentProvider : public ContentProvider {
 private:
     const uint8_t* _data;
     size_t _totalSize;
-    String _mimeType;
+    const char* _mimeType;
     bool _isReady;
     bool _ownsData;
 
@@ -29,7 +29,7 @@ public:
      * @param size Size of data
      * @param mimeType MIME type of content
      */
-    MemoryContentProvider(const uint8_t* data, size_t size, const String& mimeType)
+    MemoryContentProvider(const uint8_t* data, size_t size, const char* mimeType)
         : _data(data), _totalSize(size), _mimeType(mimeType), 
           _isReady(data != nullptr && size > 0), _ownsData(false) {}
     
@@ -40,7 +40,7 @@ public:
      * @param mimeType MIME type of content
      * @param takeOwnership If true, provider will delete data in destructor
      */
-    MemoryContentProvider(uint8_t* data, size_t size, const String& mimeType, bool takeOwnership)
+    MemoryContentProvider(uint8_t* data, size_t size, const char* mimeType, bool takeOwnership)
         : _data(data), _totalSize(size), _mimeType(mimeType), 
           _isReady(data != nullptr && size > 0), _ownsData(takeOwnership) {}
     
@@ -63,7 +63,7 @@ public:
     }
     
     size_t getTotalSize() const override { return _totalSize; }
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     void reset() override { /* Nothing to reset */ }
     bool isReady() const override { return _isReady; }
 };
@@ -76,7 +76,7 @@ class GeneratorContentProvider : public ContentProvider {
 private:
     std::function<size_t(uint8_t*, size_t, size_t)> _generator;
     size_t _totalSize;
-    String _mimeType;
+    const char* _mimeType;
     bool _isReady;
 
 public:
@@ -87,7 +87,7 @@ public:
      * @param mimeType MIME type of content
      */
     GeneratorContentProvider(std::function<size_t(uint8_t*, size_t, size_t)> generator,
-                           size_t totalSize, const String& mimeType)
+                           size_t totalSize, const char* mimeType)
         : _generator(generator), _totalSize(totalSize), _mimeType(mimeType),
           _isReady(generator != nullptr) {}
     
@@ -100,7 +100,7 @@ public:
     }
     
     size_t getTotalSize() const override { return _totalSize; }
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     void reset() override { /* Generators are typically stateless */ }
     bool isReady() const override { return _isReady; }
 };
@@ -118,7 +118,7 @@ private:
     
     std::vector<ContentPart> _parts;
     size_t _totalSize;
-    String _mimeType;
+    const char* _mimeType;
     bool _isReady;
 
 public:
@@ -126,7 +126,7 @@ public:
      * @brief Constructor
      * @param mimeType MIME type for the combined content
      */
-    explicit MultiPartContentProvider(const String& mimeType = "application/octet-stream")
+    explicit MultiPartContentProvider(const char* mimeType = "application/octet-stream")
         : _totalSize(0), _mimeType(mimeType), _isReady(true) {}
     
     /**
@@ -170,7 +170,7 @@ public:
     }
     
     size_t getTotalSize() const override { return _totalSize; }
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     
     void reset() override {
         for (auto& part : _parts) {
@@ -188,7 +188,7 @@ public:
 class CompressedContentProvider : public ContentProvider {
 private:
     std::unique_ptr<ContentProvider> _sourceProvider;
-    String _mimeType;
+    const char* _mimeType;
     bool _isReady;
     
 public:
@@ -223,7 +223,7 @@ public:
         return _sourceProvider ? _sourceProvider->getTotalSize() : 0;
     }
     
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     void reset() override { if (_sourceProvider) _sourceProvider->reset(); }
     bool isReady() const override { return _isReady; }
 };
