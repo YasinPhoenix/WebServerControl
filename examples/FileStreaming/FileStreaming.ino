@@ -5,20 +5,17 @@
  * @date 2025-09-20
  * 
  * This example demonstrates advanced file streaming capabilities including:
- * - Multiple filesystem support (LittleFS, SD)
+ * - Filesystem support (LittleFS)
  * - Automatic filesystem detection
  * - File upload handling
  * - Directory browsing
  * - File management operations
  */
 
-#include <ESPAsyncWebServer.h>
 #include <WebServerControl.h>
 #include <FilesystemProviders.h>
-#include <LittleFS.h>
 
 #include <ESP8266WiFi.h>
-#include <SD.h>
 
 // WiFi credentials
 const char* ssid = "your-wifi-ssid";
@@ -77,15 +74,6 @@ void initializeFilesystems() {
         filesystems.push_back({"LittleFS", &LittleFS, false});
         Serial.println("✗ LittleFS failed to mount");
     }
-    
-    // Try to initialize SD card (optional)
-    if (SD.begin()) {
-        filesystems.push_back({"SD", &SD, true});
-        Serial.println("✓ SD card mounted");
-    } else {
-        filesystems.push_back({"SD", &SD, false});
-        Serial.println("ℹ SD card not available");
-    }
 }
 
 void connectToWiFi() {
@@ -107,9 +95,9 @@ void setupFileStreamingRoutes() {
     // Dynamic file streaming route
     server.on("^\\/stream\\/([^\\/]+)\\/(.+)$", HTTP_GET, [](AsyncWebServerRequest *request) {
         String fsName = request->pathArg(0);
-        String filePath = "/" + request->pathArg(1);
+        const char* filePath = ("/" + request->pathArg(1)).c_str();
         
-        Serial.printf("Stream request: %s from %s\n", filePath.c_str(), fsName.c_str());
+        Serial.printf("Stream request: %s from %s\n", filePath, fsName.c_str());
         
         // Find filesystem
         fs::FS* targetFS = nullptr;
@@ -127,7 +115,9 @@ void setupFileStreamingRoutes() {
         
         // Check if file exists
         if (!targetFS->exists(filePath)) {
-            request->send(404, "text/plain", "File not found: " + filePath);
+            char msg[128];
+            snprintf(msg, sizeof(msg), "File not found: %s", filePath);
+            request->send(404, "text/plain", msg);
             return;
         }
         
@@ -153,8 +143,14 @@ void setupFileStreamingRoutes() {
                 return sharedProvider->readChunk(buffer, maxLen, index);
             });
         
+        const char* filename = strrchr(filePath, '/');
+        if (filename) filename++;  // move past '/'
+        else filename = filePath;   // no '/' found, whole path is filename
+
+        char headerValue[128];
+        snprintf(headerValue, sizeof(headerValue), "inline; filename=\"%s\"", filename);
         response->addHeader("Content-Length", String(totalSize));
-        response->addHeader("Content-Disposition", "inline; filename=\"" + filePath.substring(filePath.lastIndexOf('/') + 1) + "\"");
+        response->addHeader("Content-Disposition", headerValue);
         
         request->send(response);
     });
@@ -418,7 +414,6 @@ void printSystemInfo() {
     
     Serial.printf("Free Heap: %u bytes\n", freeHeap);
     Serial.printf("Max Allocatable: %u bytes\n", maxAlloc);
-    Serial.printf("Library Version: %s\n", WebServerControl::getVersion().c_str());
     
     Serial.println("\nAvailable Filesystems:");
     for (const auto& fs : filesystems) {
