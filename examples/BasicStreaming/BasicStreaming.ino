@@ -9,17 +9,7 @@
  * videos, or any large files on ESP8266.
  */
 
-// Workaround for ESP_Async_WebServer const-correctness issues
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-fpermissive"
-
-#include <ESPAsyncWebServer.h>
-
-#pragma GCC diagnostic pop
-
 #include <WebServerControl.h>
-#include <LittleFS.h>
-
 #include <ESP8266WiFi.h>
 
 // WiFi credentials
