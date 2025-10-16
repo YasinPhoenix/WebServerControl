@@ -373,7 +373,6 @@ void setupWebInterface() {
         json += "\"freeHeap\":" + String(freeHeap) + ",";
         json += "\"maxAlloc\":" + String(maxAlloc) + ",";
         json += "\"uptime\":" + String(millis()) + ",";
-        json += "\"version\":\"" + WebServerControl::getVersion() + "\"";
         json += "}";
         
         request->send(200, "application/json", json);
