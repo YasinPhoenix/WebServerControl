@@ -26,9 +26,9 @@
 
 #if defined(ESP8266)
 #include <ESPAsyncWebServer.h>
-#include <FS.h>
+//#include <FS.h>
 #include <LittleFS.h>
-#include <SD.h>
+//#include <SD.h>
 #elif 
     #error "Unsupported platform. Only ESP8266 is supported."
 #endif
@@ -45,9 +45,9 @@ class CallbackContentProvider;
  * @brief Configuration constants for the library
  */
 namespace WebServerControlConfig {
-    static const size_t DEFAULT_BUFFER_SIZE = 4096;    // 4KB chunks
-    static const size_t MAX_BUFFER_SIZE = 8192;        // 8KB maximum
-    static const size_t MIN_BUFFER_SIZE = 512;         // 512B minimum
+    static const size_t DEFAULT_BUFFER_SIZE = 512;    // 512B chunks
+    static const size_t MAX_BUFFER_SIZE = 4096;        // 4KB maximum
+    static const size_t MIN_BUFFER_SIZE = 256;         // 256B minimum
     static const unsigned long DEFAULT_TIMEOUT_MS = 30000; // 30 seconds
 }
 
@@ -109,9 +109,9 @@ public:
     
     /**
      * @brief Get the MIME type of the content
-     * @return MIME type string
+     * @return MIME type const char*
      */
-    virtual String getMimeType() const = 0;
+    virtual const char* getMimeType() const = 0;
     
     /**
      * @brief Reset the provider to the beginning
@@ -220,7 +220,7 @@ public:
      * @param userData Optional user data for callbacks
      * @return WSCError::SUCCESS on success, error code otherwise
      */
-    WSCError streamProvider(const String& uri, WebRequestMethodComposite method,
+    WSCError streamProvider(const char* uri, WebRequestMethodComposite method,
                            std::unique_ptr<ContentProvider> provider, size_t bufferSize = 0,
                            ProgressCallback progressCallback = nullptr, void* userData = nullptr);
     
