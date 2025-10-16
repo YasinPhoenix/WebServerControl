@@ -34,7 +34,7 @@ class SensorDataProvider : public ContentProvider {
 private:
     size_t _totalSamples;
     size_t _samplesPerChunk;
-    String _mimeType;
+    const char* _mimeType;
     bool _isReady;
     
 public:
@@ -90,7 +90,7 @@ public:
         return _totalSamples * getSampleSize() + 50; // +50 for JSON overhead
     }
     
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     void reset() override { /* Stateless generator */ }
     bool isReady() const override { return _isReady; }
     
@@ -105,7 +105,7 @@ class LiveDataProvider : public ContentProvider {
 private:
     size_t _duration;
     size_t _interval;
-    String _mimeType;
+    const char* _mimeType;
     bool _isReady;
     unsigned long _startTime;
     
@@ -142,7 +142,7 @@ public:
         return totalSamples * 30; // ~30 bytes per line
     }
     
-    String getMimeType() const override { return _mimeType; }
+    const char* getMimeType() const override { return _mimeType; }
     void reset() override { _startTime = millis(); }
     bool isReady() const override { return _isReady; }
 };
