@@ -28,7 +28,6 @@
 #include <ESPAsyncWebServer.h>
 //#include <FS.h>
 #include <LittleFS.h>
-//#include <SD.h>
 #elif 
     #error "Unsupported platform. Only ESP8266 is supported."
 #endif
@@ -157,7 +156,7 @@ private:
     void handleStreamingRequest(AsyncWebServerRequest* request, std::unique_ptr<ContentProvider> provider, 
                                size_t bufferSize = 0, ProgressCallback progressCallback = nullptr, void* userData = nullptr);
     static bool validateBufferSize(size_t bufferSize);
-    void sendErrorResponse(AsyncWebServerRequest* request, int code, const String& message);
+    void sendErrorResponse(AsyncWebServerRequest* request, int code, const char* message);
 
 public:
     /**
@@ -189,9 +188,9 @@ public:
      * @param userData Optional user data for callbacks
      * @return WSCError::SUCCESS on success, error code otherwise
      */
-    WSCError streamCallback(const String& uri, WebRequestMethodComposite method, 
+    WSCError streamCallback(const char* uri, WebRequestMethodComposite method, 
                            ContentCallback callback, size_t totalSize, 
-                           const String& mimeType = "application/octet-stream",
+                           const char* mimeType = "application/octet-stream",
                            size_t bufferSize = 0, ProgressCallback progressCallback = nullptr, void* userData = nullptr);
     
     /**
@@ -205,7 +204,7 @@ public:
      * @param userData Optional user data for callbacks
      * @return WSCError::SUCCESS on success, error code otherwise
      */
-    WSCError streamFile(const String& uri, const String& filePath, 
+    WSCError streamFile(const char* uri, const char* filePath, 
                        WebRequestMethodComposite method = HTTP_GET,
                        fs::FS* fs = nullptr, size_t bufferSize = 0, 
                        ProgressCallback progressCallback = nullptr, void* userData = nullptr);
@@ -262,22 +261,16 @@ public:
     /**
      * @brief Convert error code to human-readable string
      * @param error Error code to convert
-     * @return String description of the error
+     * @return string description of the error
      */
-    static String errorToString(WSCError error);
-    
-    /**
-     * @brief Get library version
-     * @return Version string
-     */
-    static String getVersion() { return "1.0.0"; }
+    static const char* errorToString(WSCError error);
     
     /**
      * @brief Get MIME type from file extension
      * @param filename Filename or path to extract extension from
      * @return MIME type string
      */
-    static String getMimeTypeFromExtension(const String& filename);
+    static const char* getMimeTypeFromExtension(const char* filename);
     
     /**
      * @brief Get memory usage statistics
