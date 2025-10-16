@@ -146,7 +146,6 @@ void setupWebInterface() {
                     <div class="stats">
                         <h3>System Information</h3>
                         <p><strong>Free Heap:</strong> <span id="heap">Loading...</span></p>
-                        <p><strong>Library Version:</strong> )====" + WebServerControl::getVersion() + R"====(</p>
                     </div>
 
                     <div class="example">
@@ -250,6 +249,5 @@ void printMemoryStats() {
     Serial.println("\n--- Memory Statistics ---");
     Serial.printf("Free Heap: %u bytes\n", freeHeap);
     Serial.printf("Max Allocatable Block: %u bytes\n", maxAlloc);
-    Serial.printf("Library Version: %s\n", WebServerControl::getVersion().c_str());
     Serial.println("------------------------\n");
 }
