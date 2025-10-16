@@ -99,8 +99,8 @@ WebServerControl(AsyncWebServer* server,
 
 ##### Stream File from Filesystem
 ```cpp
-WSCError streamFile(const String& uri, 
-                   const String& filePath, 
+WSCError streamFile(const char* uri, 
+                   const char* filePath, 
                    WebRequestMethodComposite method = HTTP_GET,
                    fs::FS& fs = LittleFS, 
                    size_t bufferSize = 0, 
@@ -110,11 +110,11 @@ WSCError streamFile(const String& uri,
 
 ##### Stream Generated Content
 ```cpp
-WSCError streamCallback(const String& uri, 
+WSCError streamCallback(const char* uri, 
                        WebRequestMethodComposite method, 
                        ContentCallback callback, 
                        size_t totalSize, 
-                       const String& mimeType = "application/octet-stream",
+                       const char* mimeType = "application/octet-stream",
                        size_t bufferSize = 0, 
                        ProgressCallback progressCallback = nullptr, 
                        void* userData = nullptr);
