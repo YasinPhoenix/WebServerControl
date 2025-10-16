@@ -10,7 +10,7 @@ A library that enhances **ESPAsyncWebServer** with efficient chunked streaming c
 
 - **Memory-Safe Streaming**: Serve content larger than available heap without crashes
 - **Multiple Content Sources**: Files, generated content, memory buffers, and custom providers
-- **Filesystem Support**: LittleFS, SD card with automatic detection
+- **Filesystem Support**: LittleFS
 - **Production Ready**: Comprehensive error handling, timeout management, and recovery mechanisms
 - **ESP8266 Compatible**: Optimized for ESP8266 platform
 - **Easy Integration**: Simple API that enhances existing ESPAsyncWebServer code
@@ -137,7 +137,6 @@ WSCError streamProvider(const char* uri,
 - `BufferedFileProvider`: Enhanced with internal buffering
 
 - `LittleFSProvider`: LittleFS-optimized provider
-- `SDProvider`: SD card with error recovery
 
 #### Memory Providers
 - `MemoryContentProvider`: Stream from RAM buffer
