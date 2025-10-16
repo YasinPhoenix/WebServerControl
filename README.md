@@ -122,7 +122,7 @@ WSCError streamCallback(const String& uri,
 
 ##### Stream Custom Provider
 ```cpp
-WSCError streamProvider(const String& uri, 
+WSCError streamProvider(const char* uri, 
                        WebRequestMethodComposite method,
                        std::unique_ptr<ContentProvider> provider, 
                        size_t bufferSize = 0,
